@@ -1,9 +1,20 @@
 apiVersion: v2
+appVersion: develop
 dependencies:
   - name: common
     repository: oci://registry-1.docker.io/bitnamicharts
-    version: 2.20.3
-name: telemetry-dumper
-version: 0.0.0-develop
-appVersion: develop
+    tags:
+      - bitnami-common
+    version: 2.x.x
 description: A destination for different telemetry signals that logs all incoming requests
+home: https://github.com/slamdev/telemetry-dumper
+keywords:
+  - telemetry
+  - dumper
+maintainers:
+  - name: slamdev
+    url: https://github.com/slamdev
+name: telemetry-dumper
+sources:
+  - https://github.com/slamdev/telemetry-dumper
+version: 0.0.0-develop

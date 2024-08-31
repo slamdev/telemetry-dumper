@@ -6,7 +6,6 @@
 
 ## @param global.imageRegistry Global Docker image registry
 ## @param global.imagePullSecrets Global Docker registry secret names as an array
-## @param global.storageClass Global StorageClass for Persistent Volume(s)
 ##
 global:
   imageRegistry: ""
@@ -15,7 +14,6 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
-  storageClass: ""
   ## Compatibility adaptations for Kubernetes platforms
   ##
   compatibility:
@@ -72,7 +70,7 @@ diagnosticMode:
 ##
 app:
   ## @param app.image.registry [default: REGISTRY_NAME] app image registry
-  ## @param app.image.repository [default: REPOSITORY_NAME/app] app image repository
+  ## @param app.image.repository [default: REPOSITORY_NAME/telemetry-dumper] app image repository
   ## @skip app.image.tag app image tag (immutable tags are recommended)
   ## @param app.image.digest app image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
   ## @param app.image.pullPolicy app image pull policy
@@ -195,7 +193,7 @@ app:
     fsGroupChangePolicy: Always
     sysctls: []
     supplementalGroups: []
-    fsGroup: 1001
+    fsGroup: 65532
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param app.containerSecurityContext.enabled Enabled app container' Security Context
@@ -211,8 +209,8 @@ app:
   containerSecurityContext:
     enabled: true
     seLinuxOptions: {}
-    runAsUser: 1001
-    runAsGroup: 1001
+    runAsUser: 65532
+    runAsGroup: 65532
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     privileged: false
@@ -398,7 +396,6 @@ service:
   ##
   nodePorts:
     http: ""
-    tcpMetrics: ""
   ## @param service.clusterIP app service Cluster IP
   ## e.g.:
   ## clusterIP: None
@@ -510,11 +507,14 @@ ingress:
   ## @param ingress.pathType Ingress path type
   ##
   pathType: ImplementationSpecific
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  ##
+  apiVersion: ""
   ## @param ingress.hostname Default host for the ingress record
   ##
   hostname: app.local
-  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress
-  ## This is required if you have more than one IngressClass marked as the default for your cluster .
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
   ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
   ##
   ingressClassName: ""
@@ -576,7 +576,7 @@ ingress:
   ## Please see README.md for more information
   ## e.g:
   ## secrets:
-  ##   - name: %%COMPONENT_NAME%%.local-tls
+  ##   - name: app.local-tls
   ##     key: |-
   ##       -----BEGIN RSA PRIVATE KEY-----
   ##       ...

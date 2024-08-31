@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ template "common.names.fullname" . }}
@@ -20,9 +20,8 @@ spec:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
   template:
     metadata:
-      annotations:
       {{- if .Values.app.podAnnotations }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.app.podAnnotations "context" $) | nindent 8 }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.app.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
       labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
     spec:
