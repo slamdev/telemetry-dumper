@@ -1,2 +1,3 @@
-# sample-cli
-Template repo to spin-up a cli tool running via container image
+# telemetry-dumper
+
+A destination for different telemetry signals that logs all incoming requests

@@ -18,7 +18,7 @@ publish:
 ifeq (, $(shell which ko))
 	$(error ko binary is not found in path; install it from https://ko.build/install/)
 endif
-	KO_DOCKER_REPO='ghcr.io/slamdev/sample-cli' ko build --bare \
+	KO_DOCKER_REPO='ghcr.io/slamdev/telemetry-dumper' ko build --bare \
 	 --tags=$${GIT_TAG:-develop} \
 	 --image-label org.opencontainers.image.source=$(shell git remote get-url origin) \
 	 --image-label org.opencontainers.image.revision=$(shell git rev-parse HEAD)
