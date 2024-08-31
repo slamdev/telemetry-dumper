@@ -1,0 +1,9 @@
+apiVersion: v2
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 2.20.3
+name: telemetry-dumper
+version: 0.0.0-develop
+appVersion: develop
+description: A destination for different telemetry signals that logs all incoming requests

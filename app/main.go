@@ -17,6 +17,7 @@ var version = "will-come-from-ld-flags"
 type args struct {
 	GracePeriod time.Duration `arg:"--grace-period, -g, env:GRACE_PERIOD" default:"5s"    help:"grace period for termination" placeholder:"duration"`
 	Verbose     bool          `arg:"-v, env"                              default:"false" help:"print verbose output"`
+	HTTPPort    int           `arg:"-p, env"                              default:"8080"  help:"HTTP port"`
 }
 
 func (args) Version() string {
@@ -35,7 +36,7 @@ func main() {
 			p.Fail(err.Error())
 		}
 	}
-	app := pkg.NewApp(a.Verbose, out)
+	app := pkg.NewApp(a.Verbose, out, a.HTTPPort)
 
 	cancelableCtx, cancel := context.WithCancel(context.Background())
 

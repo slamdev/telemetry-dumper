@@ -213,6 +213,7 @@ linters:
     - depguard # useless
     - execinquery # Deprecated
     - gomnd # Deprecated
+    - exportloopref # Deprecated
 
 issues:
 
