@@ -1,0 +1,31 @@
+name: release
+on:
+  workflow_dispatch: { }
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+    paths:
+      - 'app/**'
+      - '.github/workflows/release.yaml'
+defaults: { run: { shell: bash } }
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: app/go.sum
+          go-version-file: app/go.mod
+      - uses: ko-build/setup-ko@v0.6
+        with:
+          version: v0.16.0
+      - run: make publish
+        working-directory: app
+        env:
+          GIT_TAG: ${{ github.ref_name }}

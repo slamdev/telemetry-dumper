@@ -1,0 +1,8 @@
+defaultBaseImage: ghcr.io/linuxcontainers/alpine:3.20
+defaultPlatforms:
+  - linux/arm64
+  - linux/amd64
+defaultLdflags:
+  - -w -s -X main.version={{if ne .Git.Tag "v0.0.0"}}{{.Git.Tag}}{{else}}main{{end}}
+defaultFlags:
+  - -trimpath
