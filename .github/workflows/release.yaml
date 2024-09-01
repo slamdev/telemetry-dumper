@@ -36,4 +36,4 @@ jobs:
         working-directory: helm-chart
         env:
           APP_VERSION: ${{ github.ref_name }}
-          CHART_VERSION: ${{ github.ref_type == 'tag' && format('{}-chart', github.ref_name) || format('0.0.0-chart-{}', github.ref_name) }}
+          CHART_VERSION: ${{ github.ref_type == 'tag' && format('{0}-chart', github.ref_name) || format('0.0.0-chart-{0}', github.ref_name) }}
