@@ -6,6 +6,7 @@ on:
     tags: [ '*' ]
     paths:
       - 'app/**'
+      - 'helm-chart/**'
       - '.github/workflows/release.yaml'
 defaults: { run: { shell: bash } }
 concurrency:
