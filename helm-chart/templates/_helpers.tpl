@@ -2,7 +2,7 @@
 Return the proper app image name
 */}}
 {{- define "app.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.app.image "global" .Values.global) }}
+{{ include "common.images.image" (dict "imageRoot" .Values.app.image "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
 {{/*

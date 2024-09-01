@@ -80,7 +80,7 @@ app:
   image:
     registry: ghcr.io
     repository: slamdev/telemetry-dumper
-    tag: develop
+    tag: ""
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

@@ -29,3 +29,11 @@ jobs:
         working-directory: app
         env:
           GIT_TAG: ${{ github.ref_name }}
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.15.4
+      - run: make publish
+        working-directory: helm-chart
+        env:
+          APP_VERSION: ${{ github.ref_name }}
+          CHART_VERSION: ${{ github.ref_type == 'tag' && format('{}-chart', github.ref_name) || format('0.0.0-chart-{}', github.ref_name) }}
