@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -60,6 +61,15 @@ func (a *App) createHTTPHandler() http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 	slog.Info("loki handler is created", "path", "/loki/api/v1/push")
+	mux.HandleFunc("/tempo/v1/traces", func(w http.ResponseWriter, r *http.Request) {
+		if err := a.handleTempoHttpRequest(r); err != nil {
+			slog.ErrorContext(r.Context(), "failed to handle tempo request", "err", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+	slog.Info("loki handler is created", "path", "/tempo/v1/traces")
 	return mux
 }
 
@@ -77,6 +87,22 @@ func (a *App) handleLokiRequest(r *http.Request) error {
 		return fmt.Errorf("failed to unmarshal body: %w", err)
 	}
 	if err := a.log(lokiReq, r); err != nil {
+		return fmt.Errorf("failed to log request: %w", err)
+	}
+	return nil
+}
+
+func (a *App) handleTempoHttpRequest(r *http.Request) error {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read body: %w", err)
+	}
+	//decompressedBytes, err := snappy.Decode(nil, body)
+	//if err != nil {
+	//	return fmt.Errorf("failed to decode body: %w", err)
+	//}
+	b := base64.StdEncoding.EncodeToString(body)
+	if err := a.log(b, r); err != nil {
 		return fmt.Errorf("failed to log request: %w", err)
 	}
 	return nil
