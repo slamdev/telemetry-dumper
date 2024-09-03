@@ -1,8 +1,9 @@
 package pkg
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -13,19 +14,20 @@ import (
 
 	"github.com/grafana/loki/pkg/logproto"
 	"github.com/xhhuango/json"
+	tracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/klauspost/compress/snappy"
 	"github.com/prometheus/prometheus/prompb"
 )
 
 type App struct {
-	verbose bool
-	srv     *http.Server
-	out     func(msg string)
+	srv *http.Server
+	out func(msg string)
 }
 
-func NewApp(verbose bool, out func(msg string), httpPort int) *App {
-	app := App{verbose: verbose, out: out}
+func NewApp(_ bool, out func(msg string), httpPort int) *App {
+	app := App{out: out}
 	app.srv = &http.Server{
 		Addr:         fmt.Sprintf(":%d", httpPort),
 		Handler:      app.createHTTPHandler(),
@@ -62,7 +64,7 @@ func (a *App) createHTTPHandler() http.Handler {
 	})
 	slog.Info("loki handler is created", "path", "/loki/api/v1/push")
 	mux.HandleFunc("/tempo/v1/traces", func(w http.ResponseWriter, r *http.Request) {
-		if err := a.handleTempoHttpRequest(r); err != nil {
+		if err := a.handleTempoHTTPRequest(r); err != nil {
 			slog.ErrorContext(r.Context(), "failed to handle tempo request", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -92,17 +94,25 @@ func (a *App) handleLokiRequest(r *http.Request) error {
 	return nil
 }
 
-func (a *App) handleTempoHttpRequest(r *http.Request) error {
+func (a *App) handleTempoHTTPRequest(r *http.Request) error {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read body: %w", err)
 	}
-	//decompressedBytes, err := snappy.Decode(nil, body)
-	//if err != nil {
-	//	return fmt.Errorf("failed to decode body: %w", err)
-	//}
-	b := base64.StdEncoding.EncodeToString(body)
-	if err := a.log(b, r); err != nil {
+	gzr, err := gzip.NewReader(bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("failed to create gzip reader: %w", err)
+	}
+	decompressedBytes, err := io.ReadAll(gzr)
+	if err != nil {
+		return fmt.Errorf("failed to decompress body: %w", err)
+	}
+	trace := tracepb.ExportTraceServiceRequest{}
+	if err := proto.Unmarshal(decompressedBytes, &trace); err != nil {
+		return fmt.Errorf("failed to unmarshal body: %w", err)
+	}
+	//nolint:govet
+	if err := a.log(trace, r); err != nil {
 		return fmt.Errorf("failed to log request: %w", err)
 	}
 	return nil
